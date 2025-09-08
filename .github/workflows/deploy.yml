@@ -11,8 +11,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run deploy
-        run: |
-          echo "Deploying..."
         env:
           DEFAULT-BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
