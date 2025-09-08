@@ -1,0 +1,17 @@
+name: deploy
+
+on: push
+
+jobs:
+  depoly:
+    name:Lint code base
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+      - uses: actions/checkout@v2
+
+      - name: run deploy
+      - uses: github/deploy
+      env:
+        DEFAULT-BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
