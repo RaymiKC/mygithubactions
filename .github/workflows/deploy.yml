@@ -1,16 +1,53 @@
-name: deploy
+name: Lint All Code
 
-on: push
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  deploy:
-    name: Lint code base
+  lint-and-push:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
-      - name: Run deploy
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js for Prettier
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      # Step 3: Install Prettier
+      - name: Install Prettier
+        run: npm install --save-dev prettier
+
+      # Step 4: Run Prettier on all files it supports
+      - name: Prettier format
+        run: npx prettier --write "**/*.{js,ts,json,md,yml,yaml,css,scss,html}"
+
+      # Step 5: Lint Python with Black
+      - name: Lint Python
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install black
+          black .
+
+      # Step 6: Lint shell scripts with shfmt
+      - name: Lint Shell Scripts
+        run: |
+          sudo apt-get install -y shfmt
+          find . -name "*.sh" -exec shfmt -w {} \;
+
+      # Step 7: Commit and push changes
+      - name: Commit and push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --cached --quiet || git commit -m "chore: auto-lint fixes"
+          git push origin main
         env:
-          DEFAULT-BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
