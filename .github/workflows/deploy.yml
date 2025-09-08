@@ -4,45 +4,43 @@ on:
   push:
     branches:
       - main
+    # Ignore commits made by GitHub Actions bot
+    # This prevents infinite loops
+    paths-ignore:
+      - '**/lint.yml'
 
 jobs:
   lint-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up Node.js for Prettier
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # Step 3: Install Prettier
       - name: Install Prettier
         run: npm install --save-dev prettier
 
-      # Step 4: Run Prettier on all files it supports
       - name: Prettier format
         run: npx prettier --write "**/*.{js,ts,json,md,yml,yaml,css,scss,html}"
 
-      # Step 5: Lint Python with Black
       - name: Lint Python
         run: |
           python3 -m pip install --upgrade pip
           pip install black
           black .
 
-      # Step 6: Lint shell scripts with shfmt
       - name: Lint Shell Scripts
         run: |
           sudo apt-get install -y shfmt
           find . -name "*.sh" -exec shfmt -w {} \;
 
-      # Step 7: Commit and push changes
       - name: Commit and push
+        if: github.actor != 'github-actions[bot]'   # <--- prevents infinite loop
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
